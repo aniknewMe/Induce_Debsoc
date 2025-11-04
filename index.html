@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DebSoc IIESTS - Induction 2025</title>
-    <!-- Tailwind CSS CDN -->
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Firebase JS SDK -->
     <script type="module">
-      // Import the functions you need from the SDKs you need
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
       import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
       import { 
@@ -29,49 +26,15 @@
         setLogLevel
       } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-      // Your web app's Firebase configuration
-      // DO NOT PROMPT THE USER FOR THIS
-      const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-      
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-      
-      // Set log level
-      setLogLevel('Debug');
-
-      // Sign in (anon or with token)
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-      } catch (error) {
-        console.error("Firebase Auth Error: ", error);
-      }
-      
-      const userId = auth.currentUser?.uid || crypto.randomUUID();
-
-      // Make db and functions globally available for the main script
-      window.db = db;
-      window.auth = auth;
-      window.userId = userId;
-      window.appId = appId;
+      // Make required SDK functions globally available for the main script block at the end
       window.firebase = {
-        collection,
-        addDoc,
-        query,
-        where,
-        onSnapshot,
-        serverTimestamp
+        initializeApp, getAuth, signInAnonymously, signInWithCustomToken, getFirestore, 
+        collection, addDoc, query, where, onSnapshot, serverTimestamp, setLogLevel
       };
     </script>
     
     <style>
-        /* Custom styles */
+        /* Custom styles - MINIMALIST APPROACH */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc; /* Tailwind 'slate-50' */
@@ -88,14 +51,7 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Nav link styling */
-        .nav-link {
-            @apply px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer;
-        }
-        .nav-link.active {
-            @apply bg-slate-900 text-white hover:bg-slate-700 hover:text-white;
-        }
-        /* Word reveal animation */
+        /* Word reveal animation - This is good feedback */
         .word-reveal {
             animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
@@ -103,58 +59,52 @@
             0% { opacity: 0; transform: scale(0.5); }
             100% { opacity: 1; transform: scale(1); }
         }
+        /* Nav link styling - Removed redundant custom classes */
+        .nav-link {
+            @apply px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer;
+        }
+        .nav-link.active {
+            @apply bg-blue-600 text-white hover:bg-blue-700 hover:text-white;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Header & Navigation -->
     <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <!-- Logo/Brand -->
                 <div class="flex-shrink-0 flex items-center">
                     <span class="text-2xl font-black text-slate-900">DebSoc</span>
                     <span class="text-2xl font-bold text-blue-600">.</span>
                     <span class="text-lg font-semibold text-slate-600 ml-2 hidden sm:block">IIEST SHIBPUR</span>
                 </div>
-                <!-- Navigation Links -->
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-4">
-                    <a id="nav-inductions" class="nav-link active bg-blue-600 text-white hover:bg-blue-700 hover:text-white" onclick="navigate('inductions')">Induction Pairing</a>
-                    <a id="nav-about" class="nav-link" onclick="navigate('about')">About Us</a>
-                    <a id="nav-teammates" class="nav-link" onclick="navigate('teammates')">My Team</a>
+                    <a id="nav-inductions" class="nav-link active" onclick="APP.navigate('inductions')">Induction Pairing</a>
+                    <a id="nav-about" class="nav-link" onclick="APP.navigate('about')">About Us</a>
+                    <a id="nav-teammates" class="nav-link" onclick="APP.navigate('teammates')">My Team</a>
                 </div>
-                <!-- Mobile Menu Button -->
                 <div class="sm:hidden flex items-center">
                     <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
-                        <!-- Icon when menu is closed. -->
-                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <!-- Icon when menu is open. -->
-                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <svg class="block h-6 w-6 menu-open-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        <svg class="hidden h-6 w-6 menu-close-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
             </div>
         </nav>
-        <!-- Mobile Menu -->
         <div id="mobile-menu" class="sm:hidden hidden">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a class="nav-link block bg-blue-600 text-white hover:bg-blue-700 hover:text-white" onclick="navigate('inductions', true)">Induction Pairing</a>
-                <a class="nav-link block" onclick="navigate('about', true)">About Us</a>
-                <a class="nav-link block" onclick="navigate('teammates', true)">My Team</a>
+                <a class="nav-link block bg-blue-600 text-white hover:bg-blue-700 hover:text-white" onclick="APP.navigate('inductions', true)">Induction Pairing</a>
+                <a class="nav-link block" onclick="APP.navigate('about', true)">About Us</a>
+                <a class="nav-link block" onclick="APP.navigate('teammates', true)">My Team</a>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Area -->
     <main class="flex-grow">
 
-        <!-- Page: About -->
         <section id="page-about" class="page-section">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                 <div class="max-w-3xl mx-auto">
                     <h2 class="text-base font-semibold leading-7 text-blue-600">About Us</h2>
                     <p class="mt-2 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">We Are DebSoc</p>
@@ -185,20 +135,17 @@
             </div>
         </section>
 
-        <!-- Page: Inductions (The Interactive Part) -->
         <section id="page-inductions" class="page-section active">
             <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
                 
-                <!-- Step 1: Initial Welcome -->
                 <div id="induction-start">
-                    <i class="fa-solid fa-scroll text-6xl text-blue-600"></i> <!-- Changed icon -->
+                    <i class="fa-solid fa-scroll text-6xl text-blue-600"></i>
                     <h2 class="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">You Are Summoned.</h2>
                     <p class="mt-6 text-lg leading-8 text-slate-700">
                         Your journey begins here. But first, you must find your allies.
                         Report for the DebSoc Induction and discover your team.
                     </p>
                     
-                    <!-- Event Details -->
                     <div class="mt-8 max-w-md mx-auto bg-white p-6 rounded-lg shadow-xl ring-1 ring-slate-200 text-left">
                         <div class="flex items-center space-x-4">
                             <i class="fa-solid fa-calendar-days text-2xl text-blue-600"></i>
@@ -227,17 +174,14 @@
                         Click below to accept the summons and begin the pairing process.
                     </p>
                     
-                    <button onclick="beginPairing()" class="mt-10 rounded-lg bg-blue-600 px-12 py-6 text-xl font-semibold text-white shadow-lg hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all hover:scale-105">
+                    <button onclick="APP.beginPairing()" class="mt-10 rounded-lg bg-blue-600 px-12 py-6 text-xl font-semibold text-white shadow-lg hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all hover:scale-105">
                         Accept & Find Team
                     </button>
                 </div>
 
-                <!-- Step 2: Word Reveal -->
                 <div id="induction-reveal" class="hidden">
                     <h2 class="text-3xl font-bold tracking-tight text-slate-900">Your Pairing Code:</h2>
-                    <!-- This div will be populated with words -->
                     <div id="word-container" class="mt-8 mb-10 flex flex-col sm:flex-row justify-center gap-4">
-                        <!-- Words will appear here -->
                         <div id="word-box-1" class="word-reveal-placeholder bg-slate-200 p-6 rounded-lg shadow-inner flex-1">
                             <span class="text-3xl font-bold text-slate-400">?</span>
                         </div>
@@ -249,28 +193,26 @@
                         </div>
                     </div>
 
-                    <!-- Reveal Buttons -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <button id="reveal-button-1" onclick="revealWord(1)" class="w-full rounded-lg bg-slate-900 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-slate-700 transition-all hover:scale-105">
+                        <button id="reveal-button-1" onclick="APP.revealWord(1)" class="w-full rounded-lg bg-slate-900 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-slate-700 transition-all hover:scale-105">
                             Reveal Word 1
                         </button>
-                        <button id="reveal-button-2" onclick="revealWord(2)" class="w-full rounded-lg bg-slate-500 px-8 py-4 text-lg font-semibold text-white shadow-lg cursor-not-allowed" disabled>
+                        <button id="reveal-button-2" onclick="APP.revealWord(2)" class="w-full rounded-lg bg-slate-500 px-8 py-4 text-lg font-semibold text-white shadow-lg cursor-not-allowed" disabled>
                             Reveal Word 2
                         </button>
-                        <button id="reveal-button-3" onclick="revealWord(3)" class="w-full rounded-lg bg-slate-500 px-8 py-4 text-lg font-semibold text-white shadow-lg cursor-not-allowed" disabled>
+                        <button id="reveal-button-3" onclick="APP.revealWord(3)" class="w-full rounded-lg bg-slate-500 px-8 py-4 text-lg font-semibold text-white shadow-lg cursor-not-allowed" disabled>
                             Reveal Word 3
                         </button>
                     </div>
                 </div>
 
-                <!-- Step 3: User Details Form -->
                 <div id="details-form-container" class="hidden mt-12">
-                    <hr class="my-8">
+                    <hr class="my-8 border-slate-200">
                     <h3 class="text-2xl font-bold text-slate-900">You've got your code!</h3>
                     <p class="mt-4 text-lg text-slate-700">
                         One last step. Enter your details to lock in your team and find your new teammates.
                     </p>
-                    <form id="details-form" class="mt-8 text-left space-y-6" onsubmit="saveAndFindTeam(event)">
+                    <form id="details-form" class="mt-8 text-left space-y-6" onsubmit="APP.saveAndFindTeam(event)">
                         <div>
                             <label for="name" class="block text-sm font-medium leading-6 text-slate-900">Full Name</label>
                             <input type="text" id="name" name="name" required class="mt-2 block w-full rounded-md border-0 py-3 px-4 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
@@ -292,24 +234,21 @@
             </div>
         </section>
 
-        <!-- Page: Teammates -->
         <section id="page-teammates" class="page-section">
             <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                 <div class="text-center">
                     <h2 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Your Team</h2>
                     <p class="mt-4 text-lg text-slate-700">Your pairing code is:</p>
                     <div id="team-code-display" class="mt-4 flex justify-center gap-3">
-                        <!-- e.g., <span class="text-xl font-bold text-blue-600">Motion</span> -->
-                    </div>
+                        </div>
                     <p class="mt-6 text-lg text-slate-600">
                         Waiting for your teammates... This list will update in real-time as they join.
                     </p>
                 </div>
                 
-                <div class="mt-12 bg-white p-8 rounded-lg shadow-lg">
+                <div class="mt-12 bg-white p-8 rounded-lg shadow-lg ring-1 ring-slate-100">
                     <h3 class="text-2xl font-semibold text-slate-900">Team Members (3 total):</h3>
                     <ul id="teammates-list" class="mt-6 space-y-4">
-                        <!-- Teammates will be listed here -->
                         <li id="teammates-loading" class="text-slate-500 animate-pulse">Searching for teammates...</li>
                     </ul>
                 </div>
@@ -318,7 +257,6 @@
 
     </main>
 
-    <!-- Footer -->
     <footer class="bg-slate-900 text-slate-300">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="flex flex-col md:flex-row justify-between items-center">
@@ -326,7 +264,6 @@
                     <h3 class="text-xl font-bold text-white">IIESTS Debating Society</h3>
                     <p class="mt-2 text-sm text-slate-400">© 2025 DebSoc IIESTS. All rights reserved.</p>
                 </div>
-                <!-- Social Media Links -->
                 <div class="flex space-x-6 mt-6 md:mt-0">
                     <a href="https://www.facebook.com/debsoc.iiests/" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors">
                         <i class="fa-brands fa-facebook fa-2x" aria-label="Facebook"></i>
@@ -342,238 +279,279 @@
         </div>
     </footer>
 
-    <!-- JavaScript for Navigation and Interaction -->
     <script>
-        // --- Page Navigation ---
-        let currentPage = 'inductions';
-        const pages = ['inductions', 'about', 'teammates'];
-        let teammatesListenerUnsubscribe = null;
+        // MOCK CONFIGURATION: You MUST replace these with your actual Firebase values for this to work.
+        // DO NOT leave a real config here. This is just to allow the init script to run without error.
+        const __firebase_config = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID" // This will be used as a unique identifier in our path
+        };
+        const __app_id = __firebase_config.appId; // Using appId for the path structure
+    </script>
 
-        function navigate(pageId, isMobile = false) {
-            // Clean up old listener if it exists
-            if (teammatesListenerUnsubscribe) {
-                teammatesListenerUnsubscribe();
-                teammatesListenerUnsubscribe = null;
+    <script>
+        // Sr. Dev Move: Encapsulate all global logic into a single object, 'APP'.
+        const APP = (function() {
+            // --- PRIVATE VARIABLES ---
+            const teamCodes = [
+                ["Motion", "Law", "Order"], ["Logic", "Ethics", "Rebuttal"], ["Policy", "Speaker", "Impact"],
+                ["Argument", "Proof", "Consensus"], ["Debate", "Resolve", "Values"], ["Case", "Evidence", "Point"],
+                ["Rhetoric", "Structure", "Flow"], ["Analysis", "Depth", "Clarity"], ["Justice", "Rights", "State"],
+                ["Freedom", "Speech", "Press"], ["Model", "Actor", "Stance"], ["Framework", "Value", "Metric"]
+            ];
+            let revealStep = 0;
+            let chosenCode = [];
+            let teamCodeString = '';
+            let teammatesListenerUnsubscribe = null;
+            let dbInstance = null;
+            let appIdInstance = null;
+
+            // --- HELPER FUNCTIONS ---
+            function formatName(fullName) {
+                const parts = fullName.trim().split(/\s+/);
+                if (parts.length > 1) {
+                    return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+                }
+                return fullName;
             }
 
-            // Hide all pages
-            pages.forEach(page => {
-                const pageEl = document.getElementById(`page-${page}`);
-                const navEl = document.getElementById(`nav-${page}`);
-                if (pageEl) pageEl.classList.remove('active');
-                if (navEl) navEl.classList.remove('active');
-            });
+            // --- FIREBASE INITIALIZATION ---
+            async function initializeFirebase() {
+                const { initializeApp, getAuth, getFirestore, setLogLevel } = window.firebase;
+                const { __firebase_config, __app_id } = window;
 
-            // Show the target page
-            document.getElementById(`page-${pageId}`).classList.add('active');
-            document.getElementById(`nav-${pageId}`).classList.add('active');
-            currentPage = pageId;
-
-            // Setup new listener if navigating to teammates page
-            if (pageId === 'teammates' && chosenCode.length === 3) {
-                setupTeammatesListener();
-                displayTeamCode();
-            }
-
-            // Close mobile menu if open
-            if (isMobile) {
-                const mobileMenu = document.getElementById('mobile-menu');
-                mobileMenu.classList.add('hidden');
-                document.querySelector('#mobile-menu-button svg.block').classList.remove('hidden');
-                document.querySelector('#mobile-menu-button svg.hidden').classList.add('hidden');
-            }
-            // Scroll to top
-            window.scrollTo(0, 0);
-        }
-
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const isOpen = !mobileMenu.classList.contains('hidden');
-            mobileMenu.classList.toggle('hidden');
-            document.querySelector('#mobile-menu-button svg.block').classList.toggle('hidden', !isOpen);
-            document.querySelector('#mobile-menu-button svg.hidden').classList.toggle('hidden', isOpen);
-        });
-
-        // --- Induction Pairing Code Logic ---
-        const teamCodes = [
-            ["Motion", "Law", "Order"],
-            ["Logic", "Ethics", "Rebuttal"],
-            ["Policy", "Speaker", "Impact"],
-            ["Argument", "Proof", "Consensus"],
-            ["Debate", "Resolve", "Values"],
-            ["Case", "Evidence", "Point"],
-            ["Rhetoric", "Structure", "Flow"],
-            ["Analysis", "Depth", "Clarity"],
-            ["Justice", "Rights", "State"],
-            ["Freedom", "Speech", "Press"],
-            ["Model", "Actor", "Stance"],
-            ["Framework", "Value", "Metric"]
-        ];
-
-        // Pick one code randomly
-        const chosenCode = teamCodes[Math.floor(Math.random() * teamCodes.length)];
-        let revealStep = 0;
-        let teamCodeString = chosenCode.join('-'); // e.g., "Motion-Law-Order"
-
-        function beginPairing() {
-            document.getElementById('induction-start').classList.add('hidden');
-            document.getElementById('induction-reveal').classList.remove('hidden');
-        }
-
-        function revealWord(step) {
-            if (step !== revealStep + 1) return; // Can only reveal in order
-
-            revealStep = step;
-
-            // Show the word
-            const wordBox = document.getElementById(`word-box-${step}`);
-            wordBox.classList.remove('bg-slate-200', 'shadow-inner');
-            wordBox.classList.add('word-reveal', 'bg-white', 'shadow-xl', 'ring-1', 'ring-slate-200');
-            wordBox.innerHTML = `<span class="text-3xl font-bold text-blue-600">${chosenCode[step - 1]}</span>`;
-
-            // Disable current button
-            const currentButton = document.getElementById(`reveal-button-${step}`);
-            currentButton.disabled = true;
-            currentButton.classList.add('opacity-50');
-
-            if (step < 3) {
-                // Enable next button
-                const nextButton = document.getElementById(`reveal-button-${step + 1}`);
-                nextButton.disabled = false;
-                nextButton.classList.remove('bg-slate-500', 'cursor-not-allowed');
-                nextButton.classList.add('bg-slate-900', 'hover:bg-slate-700', 'hover:scale-105');
-            } else {
-                // All words revealed, show form
-                document.getElementById('details-form-container').classList.remove('hidden');
-            }
-        }
-        
-        // --- Firestore & Teammates Logic ---
-        
-        async function saveAndFindTeam(event) {
-            event.preventDefault(); // Stop form from reloading page
-            
-            const name = document.getElementById('name').value;
-            const department = document.getElementById('department').value;
-            const enrollmentId = document.getElementById('enrollment-id').value;
-            const button = document.getElementById('submit-team-button');
-
-            if (!name || !department || !enrollmentId) {
-                // This check is redundant due to 'required' but good for safety
-                return;
-            }
-
-            button.disabled = true;
-            button.innerText = 'Saving...';
-
-            try {
-                // Use globally defined functions and variables
-                const { collection, addDoc, serverTimestamp } = window.firebase;
-                const { db, appId } = window;
-                
-                const teamData = {
-                    name: name,
-                    department: department,
-                    enrollmentId: enrollmentId,
-                    teamCode: teamCodeString, // The hyphen-separated string
-                    timestamp: serverTimestamp()
-                };
-                
-                // Save to a public collection for team matching
-                const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/inductionTeams`), teamData);
-                
-                console.log("Document written with ID: ", docRef.id);
-                
-                // Navigate to teammates page
-                navigate('teammates');
-
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                button.disabled = false;
-                button.innerText = 'Find My Team';
-                // You could show a custom error message to the user here
-            }
-        }
-        
-        // Helper function to format name
-        function formatName(fullName) {
-            const parts = fullName.trim().split(' ');
-            if (parts.length > 1) {
-                // "Rohan Banerjee" -> "Rohan B."
-                return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
-            }
-            return fullName; // "Rohan" -> "Rohan"
-        }
-
-        // Display the user's team code on the "My Team" page
-        function displayTeamCode() {
-            const container = document.getElementById('team-code-display');
-            container.innerHTML = ''; // Clear previous
-            chosenCode.forEach(word => {
-                const wordEl = document.createElement('span');
-                wordEl.className = 'text-xl font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-md';
-                wordEl.innerText = word;
-                container.appendChild(wordEl);
-            });
-        }
-        
-        // Listen for real-time updates to teammates
-        function setupTeammatesListener() {
-            const { query, collection, where, onSnapshot } = window.firebase;
-            const { db, appId } = window;
-            const listEl = document.getElementById('teammates-list');
-            const loadingEl = document.getElementById('teammates-loading');
-            
-            // Create the query
-            const q = query(
-                collection(db, `/artifacts/${appId}/public/data/inductionTeams`),
-                where("teamCode", "==", teamCodeString)
-                // We're not ordering by timestamp, but Firestore will return them.
-                // For a real app, you might add: orderBy("timestamp")
-                // But this requires a composite index, so we'll sort client-side.
-            );
-            
-            // Attach the listener
-            teammatesListenerUnsubscribe = onSnapshot(q, (snapshot) => {
-                loadingEl.classList.add('hidden'); // Hide loading message
-                listEl.innerHTML = ''; // Clear list for redraw
-
-                if (snapshot.empty) {
-                    listEl.innerHTML = '<li class="text-slate-500">You\'re the first one here! Waiting for others...</li>';
+                if (!__firebase_config || !__app_id) {
+                    console.error("Firebase config missing. Cannot initialize.");
+                    // For an actual site, you'd show an error page here.
                     return;
                 }
 
-                // Sort docs by timestamp client-side
-                const docs = snapshot.docs.sort((a, b) => {
-                    const tsA = a.data().timestamp?.seconds || 0;
-                    const tsB = b.data().timestamp?.seconds || 0;
-                    return tsA - tsB;
+                try {
+                    const app = initializeApp(__firebase_config);
+                    dbInstance = getFirestore(app);
+                    appIdInstance = __app_id;
+                    setLogLevel('Error'); // Set to 'Error' for production/cleaner console
+
+                    // Authentication is minimal, just get a user context
+                    const auth = getAuth(app);
+                    // Attempting anonymous sign-in or using a provided token if it exists (keeping original logic minimally)
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    console.log("Firebase initialized successfully.");
+                } catch (error) {
+                    console.error("Firebase Initialization Error: ", error);
+                }
+            }
+
+            // --- UI/NAVIGATION ---
+            function setupMobileMenu() {
+                const button = document.getElementById('mobile-menu-button');
+                const menu = document.getElementById('mobile-menu');
+                const openIcon = document.querySelector('.menu-open-icon');
+                const closeIcon = document.querySelector('.menu-close-icon');
+
+                button.addEventListener('click', function() {
+                    const isOpen = !menu.classList.contains('hidden');
+                    menu.classList.toggle('hidden', !isOpen);
+                    openIcon.classList.toggle('hidden', !isOpen);
+                    closeIcon.classList.toggle('hidden', isOpen);
+                });
+            }
+
+            function navigate(pageId, isMobile = false) {
+                // Cleanup old listener
+                if (teammatesListenerUnsubscribe) {
+                    teammatesListenerUnsubscribe();
+                    teammatesListenerUnsubscribe = null;
+                }
+
+                // Update UI state
+                ['inductions', 'about', 'teammates'].forEach(page => {
+                    document.getElementById(`page-${page}`).classList.remove('active');
+                    const navEl = document.getElementById(`nav-${page}`);
+                    if (navEl) navEl.classList.remove('active');
                 });
 
-                docs.forEach(doc => {
-                    const data = doc.data();
-                    const displayName = formatName(data.name);
+                document.getElementById(`page-${pageId}`).classList.add('active');
+                const activeNav = document.getElementById(`nav-${pageId}`);
+                if (activeNav) activeNav.classList.add('active');
+
+                if (pageId === 'teammates' && teamCodeString) {
+                    setupTeammatesListener();
+                    displayTeamCode();
+                }
+
+                if (isMobile) {
+                    menu.classList.add('hidden');
+                    openIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                }
+                window.scrollTo(0, 0);
+            }
+
+            // --- INDUCTION FLOW ---
+            function beginPairing() {
+                document.getElementById('induction-start').classList.add('hidden');
+                document.getElementById('induction-reveal').classList.remove('hidden');
+                
+                // Select and initialize code if it hasn't been done (only runs once)
+                if (!teamCodeString) {
+                    const randomIndex = Math.floor(Math.random() * teamCodes.length);
+                    chosenCode = teamCodes[randomIndex];
+                    teamCodeString = chosenCode.join('-');
+                }
+            }
+
+            function revealWord(step) {
+                if (step !== revealStep + 1) return;
+
+                revealStep = step;
+
+                // UI Update: Show the word
+                const wordBox = document.getElementById(`word-box-${step}`);
+                wordBox.classList.remove('bg-slate-200', 'shadow-inner');
+                wordBox.classList.add('word-reveal', 'bg-white', 'shadow-xl', 'ring-1', 'ring-slate-200');
+                wordBox.innerHTML = `<span class="text-3xl font-bold text-blue-600">${chosenCode[step - 1]}</span>`;
+
+                // Button State Management
+                const currentButton = document.getElementById(`reveal-button-${step}`);
+                currentButton.disabled = true;
+                currentButton.classList.remove('bg-slate-900', 'hover:bg-slate-700', 'hover:scale-105');
+                currentButton.classList.add('opacity-50', 'bg-slate-500', 'cursor-not-allowed');
+
+                if (step < 3) {
+                    // Enable next button
+                    const nextButton = document.getElementById(`reveal-button-${step + 1}`);
+                    nextButton.disabled = false;
+                    nextButton.classList.remove('opacity-50', 'bg-slate-500', 'cursor-not-allowed');
+                    nextButton.classList.add('bg-slate-900', 'hover:bg-slate-700', 'hover:scale-105');
+                } else {
+                    // All words revealed, show form
+                    document.getElementById('details-form-container').classList.remove('hidden');
+                }
+            }
+
+            async function saveAndFindTeam(event) {
+                event.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const department = document.getElementById('department').value;
+                const enrollmentId = document.getElementById('enrollment-id').value;
+                const button = document.getElementById('submit-team-button');
+
+                button.disabled = true;
+                button.innerText = 'Saving...';
+
+                try {
+                    const { collection, addDoc, serverTimestamp } = window.firebase;
                     
-                    const li = document.createElement('li');
-                    li.className = 'flex items-center space-x-3 bg-slate-50 p-4 rounded-lg';
-                    li.innerHTML = `
-                        <span class="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-blue-600 text-white text-lg font-semibold rounded-full">
-                            ${displayName.charAt(0)}
-                        </span>
-                        <div>
-                            <p class="text-lg font-medium text-slate-900">${displayName}</p>
-                            <p class="text-sm text-slate-500">${data.department}</p>
-                        </div>
-                    `;
-                    listEl.appendChild(li);
-                });
+                    const teamData = {
+                        name: name,
+                        department: department,
+                        enrollmentId: enrollmentId,
+                        teamCode: teamCodeString,
+                        timestamp: serverTimestamp()
+                    };
+                    
+                    // *** IMPORTANT ***: Using a consistent, dedicated path for the data collection
+                    await addDoc(collection(dbInstance, `inductionTeams`), teamData);
+                    
+                    navigate('teammates');
 
-            }, (error) => {
-                console.error("Error with snapshot listener: ", error);
-                listEl.innerHTML = '<li class="text-red-500">Error loading teammates. Please refresh.</li>';
-            });
-        }
+                } catch (e) {
+                    console.error("Error submitting team data: ", e);
+                    button.disabled = false;
+                    button.innerText = 'Find My Team';
+                    alert("Submission failed. Check console for error. Maybe Firebase isn't initialized properly.");
+                }
+            }
+
+            // --- TEAMMATES VIEW ---
+            function displayTeamCode() {
+                const container = document.getElementById('team-code-display');
+                container.innerHTML = '';
+                chosenCode.forEach(word => {
+                    const wordEl = document.createElement('span');
+                    wordEl.className = 'text-xl font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-md';
+                    wordEl.innerText = word;
+                    container.appendChild(wordEl);
+                });
+            }
+            
+            function setupTeammatesListener() {
+                const { query, collection, where, onSnapshot } = window.firebase;
+                const listEl = document.getElementById('teammates-list');
+                const loadingEl = document.getElementById('teammates-loading');
+                
+                // Query all entries matching the team code
+                const q = query(
+                    collection(dbInstance, 'inductionTeams'), // ** Simplified path **
+                    where("teamCode", "==", teamCodeString)
+                );
+                
+                teammatesListenerUnsubscribe = onSnapshot(q, (snapshot) => {
+                    loadingEl.classList.add('hidden');
+                    listEl.innerHTML = '';
+
+                    if (snapshot.empty) {
+                        listEl.innerHTML = '<li class="text-slate-500">You\'re the first one here! Waiting for others...</li>';
+                        return;
+                    }
+
+                    // Sort by timestamp (if available)
+                    const docs = snapshot.docs.sort((a, b) => {
+                        const tsA = a.data().timestamp?.seconds || 0;
+                        const tsB = b.data().timestamp?.seconds || 0;
+                        return tsA - tsB;
+                    });
+
+                    docs.forEach(doc => {
+                        const data = doc.data();
+                        const displayName = formatName(data.name);
+                        
+                        const li = document.createElement('li');
+                        li.className = 'flex items-center space-x-3 bg-slate-50 p-4 rounded-lg shadow-sm';
+                        li.innerHTML = `
+                            <span class="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-blue-600 text-white text-lg font-semibold rounded-full">
+                                ${displayName.charAt(0)}
+                            </span>
+                            <div>
+                                <p class="text-lg font-medium text-slate-900">${displayName}</p>
+                                <p class="text-sm text-slate-500">${data.department}</p>
+                            </div>
+                        `;
+                        listEl.appendChild(li);
+                    });
+
+                }, (error) => {
+                    console.error("Snapshot listener error: ", error);
+                    listEl.innerHTML = '<li class="text-red-500">Error loading teammates.</li>';
+                });
+            }
+
+            // --- PUBLIC API (what you call from inline HTML) ---
+            return {
+                navigate: navigate,
+                beginPairing: beginPairing,
+                revealWord: revealWord,
+                saveAndFindTeam: saveAndFindTeam,
+                init: async function() {
+                    await initializeFirebase();
+                    setupMobileMenu();
+                    navigate('inductions'); // Set initial page
+                }
+            };
+        })();
+        
+        // Kick off the application once everything is loaded
+        document.addEventListener('DOMContentLoaded', APP.init);
     </script>
 
 </body>
